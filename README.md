@@ -1,7 +1,7 @@
 # Discord Trollbot
 ## About
 
-Discord Trollbot is a rather simple Discord Bot to troll and annoy your friends on Discord. You can spam, delete, mute, deafen, move play soundclips and much more.
+Discord Trollbot is a rather simple Discord Bot to troll and annoy your friends on Discord. You can spam, delete, mute, deafen, move, play soundclips and much more.
 ## Features
 |   | | 
 | ------------- |:-------------
