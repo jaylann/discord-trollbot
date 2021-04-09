@@ -36,21 +36,21 @@ Clone this repository and open it:
 git clone https://github.com/jaylann/discord-trollbot
 cd discord-trollbot
 ```
-Install all required modules
+Install all required modules.
 ```bash
 pip install -r requirements.txt
 ```
 Now you're ready to run the file but before you do that you first need to create your Discord bot.
 
 To do that head over to the discord developer portal and open your applications. 
-Or click **[here](https://discord.com/developers/applications)**
+Or click **[here](https://discord.com/developers/applications)**.
 
 Click on new application and enter a name.
 You can also upload a picture and change the description if you want to.
 
 Now go to the **OAuth2** panel.
 From the **"Scopes"** menu select **"bot"**.
-Then select all required permissions as shown below
+Then select all required permissions as shown below.
 
 ![Required Permissions](https://i.imgur.com/OwONKGD.png)
 
@@ -59,14 +59,14 @@ Or alternatively just select administrator if you are the owner.
 Then copy the link that appears after selecting all permissions and paste it into your browser.
 Select your Discord server and add the bot to the server.
 
-Then go to the **"Bot"** section and copy the token
+Then go to the **"Bot"** section and copy the token.
 
 ![Copy Token](https://i.imgur.com/Zf474bJ.png)
 
 In your cloned repository open the **```"Token.env"```** file and replace **```"YOUR_DISCORD_API_TOKEN"```** with your token.
 
 Then open discord, go to your server and right click your name. Select **"Copy ID"**.
-Paste this ID into the **```"Token.env"```** file under **```"YOUR_DISCORD_USER_ID"```**
+Paste this ID into the **```"Token.env"```** file under **```"YOUR_DISCORD_USER_ID"```**.
 
 Open a command prompt in your cloned repository and run.
 
