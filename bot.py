@@ -30,8 +30,8 @@ INSULT_LIST = ["<@{0}> is a Motherfucker\n", "<@{0}> You Piece of Shit\n", "<@{0
 
 async def print_help(message):
     await message.channel.send("```\n"
-                               "_addTarget @user               adds a target to the spam list[*1]\n"
-                               "_delTarget @user               removes a target from the spam list[*1]\n"
+                               "_addTarget @user [length]      adds a target to the spam list[*1]\n"
+                               "_delTarget @user [length]      removes a target from the spam list[*1]\n"
                                "_blacklist @user               adds user to the blacklist[*2]\n"
                                "_unblacklist @user             removes user from the blacklist[*2]\n"
                                "_addSudoer @user               adds user to the sudoers list[*3]\n"
@@ -40,8 +40,8 @@ async def print_help(message):
                                "_delSuperUser @user            removes user from super users[*4]\n"
                                "_voiceBlacklist @user          adds user to the voice blacklist[*5]\n"
                                "_delVoiceBlacklist @user       removes user from the voice blacklist [*5]\n"
-                               "_spam @user                    spams user in current channel and in private\n"
-                               "                               messages"
+                               "_spam @user [length]           spams user in current channel and in private\n"
+                               "                               messages. Messages will be [length] insults long"
                                "```")
 
     await message.channel.send("```"
@@ -60,7 +60,10 @@ async def print_help(message):
                                "```")
 
     await message.channel.send("```"
-                               "[*1] spam list                  everytime a user on the spam list sends a message\n"
+                               "[*1] spam list                 everytime a user on the spam list sends a message\n"
+                               "                               the bot will respond and spam insults and also\n"
+                               "                               insult the user in private messages.\n"
+                               "                               These insults will be [length] insults long\n"
                                "                               the bot will respond and spam insults and also\n"
                                "                               insult the user in private messages\n"
                                "[*2] blacklist                 every message sent by this user will instantly be\n"
@@ -102,23 +105,16 @@ def generate_insults(length, user_id):
             return insult_string
 
 
-async def spam_messages(message, global_spam, msg_amount):
+async def spam_messages(channel, global_spam, msg_amount, target):
     for _ in range(global_spam):
-        try:
-            send_msg = generate_insults(msg_amount, message.author.id)
 
-        except AttributeError:
-            send_msg = generate_insults(msg_amount, message.id)
+        send_msg = generate_insults(msg_amount, target.id)
 
-        await message.channel.send(send_msg)
+        await channel.send(send_msg)
 
-        try:
-            if not message.author.bot:
-                await message.author.send(send_msg)
+        if not target.bot:
 
-        except AttributeError:
-            if not message.bot:
-                await message.send(send_msg)
+            await target.send(send_msg)
 
 
 async def check_args(message, amount):
@@ -247,7 +243,7 @@ async def voice_fucker(user_id, amount):
         voice_channels.append(channel)
 
     for x in range(amount):
-        channel = voice_channels[random.randint(0, len(voice_channels))]
+        channel = voice_channels[random.randint(0, len(voice_channels)-1)]
 
         await user_id.move_to(channel)
 
@@ -281,7 +277,6 @@ async def play_sound(user_id, amount):
         while vc.is_playing():
             await asyncio.sleep(1)
 
-        # disconnect after the player has finished
         vc.stop()
 
         await vc.disconnect()
@@ -311,13 +306,26 @@ async def on_voice_state_update(member, _before, _after):
     tmp_voice_blacklist = load_config({'voiceBlacklist': "userID"})
 
     for x in tmp_voice_blacklist:
-        voice_blacklist.append(x[0])
+        try:
+            if x:
+                voice_blacklist.append(x[0])
+        except KeyError:
+            pass
 
     if member.id in voice_blacklist:
         while True:
-            await edit_voice(member, "mute", 1)
-            await play_sound(member, 1)
-            await voice_fucker(member, 1)
+            try:
+                await edit_voice(member, "mute", 1)
+                await voice_fucker(member, 1)
+
+                try:
+                    await play_sound(member, 1)
+
+                except discord.errors.ClientException:
+                    pass
+
+            except discord.errors.HTTPException:
+                break
 
 
 @client.event
@@ -328,10 +336,12 @@ async def on_message(message):
     global_spam, tmp_spam_list, sudo_users, super_users, blacklist, voice_blacklist, data = load_config(categories)
 
     global_spam = global_spam[0]
+    print(tmp_spam_list)
 
-    if tmp_spam_list[0]:
-        for x in tmp_spam_list:
-            spam_list[x[0]] = x[1]
+    if tmp_spam_list:
+        if tmp_spam_list[0]:
+            for x in tmp_spam_list:
+                spam_list[x[0]] = x[1]
 
     if message.author == client.user:
         return
@@ -378,7 +388,7 @@ async def on_message(message):
                     if message.mentions[0] not in super_users:
                         await voice_fucker(message.mentions[0], int(cmd_args[1]))
 
-            elif cmd == "voiceBlocker":
+            elif cmd == "voiceBlock":
                 if message.mentions[0].id not in super_users or message.author.id == int(ADMIN_USER_ID):
                     cmd_args = await check_args(message, 2)
 
@@ -440,15 +450,12 @@ async def on_message(message):
 
             elif cmd == "spam":
                 if message.mentions[0].id not in super_users or message.author.id == int(ADMIN_USER_ID):
-                    if not await check_args(message, 1):
+
+                    spam_amount = await check_args(message, 2)
+                    if not spam_amount[1]:
                         return
 
-                    targets = message.mentions
-
-                    for target in targets:
-
-                        if target.id not in super_users:
-                            await spam_messages(target, global_spam, 3)
+                    await spam_messages(message.channel, global_spam, int(spam_amount[1]), message.mentions[0])
 
             elif cmd == "addSuperUser":
 
@@ -493,30 +500,30 @@ async def on_message(message):
                 if message.mentions[0].id not in super_users or message.author.id == int(ADMIN_USER_ID):
                     duration = await check_args(message, 2)
 
-                    await edit_voice(message.mentions[0], "mute", int(duration[0]))
+                    await edit_voice(message.mentions[0], "mute", int(duration[1]))
 
             elif cmd == "voiceDeafen":
                 if message.mentions[0].id not in super_users or message.author.id == int(ADMIN_USER_ID):
                     duration = await check_args(message, 2)
 
-                    await edit_voice(message.mentions[0], "deafen", int(duration[0]))
+                    await edit_voice(message.mentions[0], "deafen", int(duration[1]))
 
         else:
 
             await message.channel.send("YOU DO NOT HAVE PERMISSION TO EXECUTE THAT COMMAND")
 
             if message.author.id not in super_users:
-                await spam_messages(message, global_spam, 3)
+                await spam_messages(message.channel, global_spam, 3, message.author)
 
     elif message.author.id in spam_list and message.author.id not in super_users and message.author.id in blacklist:
         await message.delete()
-        await spam_messages(message, global_spam, spam_list[message.author.id])
+        await spam_messages(message.channel, global_spam, spam_list[message.author.id], message.author)
 
     elif message.author.id in blacklist and message.author.id not in super_users:
         await message.delete()
 
     elif message.author.id in spam_list and message.author.id not in super_users:
-        await spam_messages(message, global_spam, spam_list[message.author.id])
+        await spam_messages(message.channel, global_spam, spam_list[message.author.id], message.author)
 
 
 client.run(TOKEN)
