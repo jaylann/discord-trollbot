@@ -17,7 +17,7 @@ Discord Trollbot is a rather simple Discord Bot to troll and annoy your friends 
 |_delVoiceBlacklist @user|removes user from the voice blacklist [*5]
 |_spam @user [length]|spams user in current channel and in private messages. Messages will be [length] insults long
 |_voiceMove @user [amount]|moves user in voice chat around [amount] random channels
-|_voiceBlocker @user [seconds]|moves user in voice chat into random channels excluding the current one for [seconds] seconds
+|_voiceBlock @user [seconds]|moves user in voice chat into random channels excluding the current one for [seconds] seconds
 |_voiceAnnoy @user [amount]|bot joins user and plays [amount] random annoying sound clips
 |_voiceMute @user [seconds]|server mutes user in voice channel every second for [seconds] seconds
 |_voiceDeafen @user [seconds]|server deafens user in voice channel every second for [seconds] seconds
