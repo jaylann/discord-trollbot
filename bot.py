@@ -47,7 +47,7 @@ async def print_help(message):
     await message.channel.send("```"
                                "_voiceMove @user [amount]      moves user in voice chat around [amount] random\n"
                                "                               channels\n"
-                               "_voiceBlocker @user [seconds]  moves user in voice chat into random channels\n"
+                               "_voiceBlock @user [seconds]  moves user in voice chat into random channels\n"
                                "                               excluding the current one for [seconds] seconds\n"
                                "_voiceAnnoy @user [amount]     bot joins user and plays [amount] random annoying\n"
                                "                               sound clips\n"
